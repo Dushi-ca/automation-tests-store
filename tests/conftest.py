@@ -5,6 +5,7 @@ from selenium import webdriver
 from config.settings import BASE_DIR
 from config.settings import ROOT_URL
 
+
 """
 Selenium Test Automation Fixtures.
 
@@ -22,7 +23,6 @@ def root_url():
     return ROOT_URL
 
 
-@pytest.fixture
 def get_config_file_path():
     """
         Fixture for the path to the test configuration json file.
@@ -76,3 +76,9 @@ def browser(config):
 
     driver.quit()
 
+
+def read_catalog_json():
+    res = []
+    with open(BASE_DIR/'tests'/'test_data'/'catalog_title.json') as test_data_json_file:
+        res = json.load(test_data_json_file)
+    return res

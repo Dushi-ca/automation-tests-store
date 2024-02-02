@@ -1,7 +1,11 @@
+import pytest
+
+from tests.conftest import read_catalog_json
 from tests.page_actions.main_actions import MainActions
 from tests.page_actions.catalog_actions import CatalogActions
 from tests.page_actions.profile_actions import ProfileActions
 import os
+
 
 
 def test_titles_are_correct(browser, root_url):
@@ -17,6 +21,11 @@ def test_titles_are_correct(browser, root_url):
     catalog_page = CatalogActions(browser)
     catalog_title = catalog_page.get_title()
     assert catalog_title == 'Laptops & Notebooks'
+
+
+@pytest.mark.parametrize("catalog", read_catalog_json())
+def test_catalog_titles(browser, root_url, catalog):
+    assert catalog in CatalogActions(browser, root_url).get_catalogs_list(root_url)
 
 
 def test_add_to_cart_and_remove(browser, root_url):
@@ -38,7 +47,7 @@ def test_add_to_cart_and_remove(browser, root_url):
 
 def test_bs_navbar(browser, root_url):
     catalog_page = CatalogActions(browser, root_url)
-    catalog_page.parse_navbar(root_url)
+    catalog_page.parse_products(root_url)
 
     file_path = os.path.relpath('products.txt')
 
@@ -50,7 +59,7 @@ def test_bs_navbar(browser, root_url):
 
     try:
         with open(file_path, 'x') as file:
-            file.write('\n'.join(catalog_page.parse_navbar(root_url)))
+            file.write('\n'.join(catalog_page.parse_products(root_url)))
         print('Data is written to products.txt.')
     except Exception as e:
         print(f"An error occurred while writing to file: {e}")

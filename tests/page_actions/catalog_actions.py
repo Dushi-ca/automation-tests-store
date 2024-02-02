@@ -13,7 +13,7 @@ class CatalogActions(BaseActions):
     """
     def __init__(self, driver, base_url=None):
         super(CatalogActions, self).__init__(driver, base_url=base_url)
-        self.base_url = base_url + '/index.php?route=product/category&path=18'
+        self.base_url = base_url
 
     def get_card_title(self):
         """Gets the title of the card on the catalog page."""
@@ -46,7 +46,6 @@ class CatalogActions(BaseActions):
              Returns an empty list if no products are found.
         """
         self.driver.get(category_url)
-        self.driver.maximize_window()
         bs = BeautifulSoup(self.driver.page_source, 'html.parser')
 
         # find the product-layout class
@@ -68,7 +67,7 @@ class CatalogActions(BaseActions):
 
 # Функция парсит навбар, обнаруживая является ли элемент навбара дропдауном или ссылкой,
 # в первом случае парсит дропдаун и добавляет ссылки на категории, во втором добавляет категорию
-    def parse_navbar(self, root_url):
+    def parse_products(self, root_url):
         """
        Parses the navbar on the page to extract product names from categories.
 
@@ -80,17 +79,25 @@ class CatalogActions(BaseActions):
         """
         self.driver.get(root_url)
 
-        self.driver.maximize_window()
-
         bs = BeautifulSoup(self.driver.page_source, 'html.parser')
 
         navbar = bs.find('ul', attrs={'class': 'nav navbar-nav'})
 
         category_links = [el['href'] for el in navbar.find_all('a')]
 
-        products = []
+        products = set()
 
         for link in category_links:
-            products += (self.get_names_from_category(link))
-            products = set(products)
+            products.update(self.get_names_from_category(link))
         return products
+
+    def get_catalogs_list(self, root_url):
+        self.driver.get(root_url)
+        bs = BeautifulSoup(self.driver.page_source, 'html.parser')
+        navbar = bs.find('ul', attrs={'class': 'nav navbar-nav'})
+        catalogs_list = []
+
+        for el in navbar.find_all('li', recursive=False):
+            links_texts = el.find_all('a', recursive=False)[0].get_text()
+            catalogs_list.append(links_texts)
+        return catalogs_list
